@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+title: "codonamr: codon usage analysis of antimicrobial resistance genes, with validated controls"
+abstract: >-
+  codonamr takes sequence identifiers, fetches the coding sequences, resolves
+  the source organism to a RefSeq reference genome, computes the standard
+  codon-usage indices, and applies a length-matched null and a per-nucleotide
+  composition control. The controls are validated by injecting an association
+  of known size and by injecting none.
+type: software
+authors:
+  - family-names: "Victor"
+    given-names: "Manish Prakash"
+version: 0.1.0
+date-released: 2026-09-22
+license: MIT
+repository-code: "https://github.com/bioforkgithub/codonamr"
+keywords:
+  - codon usage
+  - antimicrobial resistance
+  - codon adaptation index
+  - effective number of codons
+  - bioinformatics
+# doi: 10.5281/zenodo.XXXXXXX   # filled in after the first Zenodo release

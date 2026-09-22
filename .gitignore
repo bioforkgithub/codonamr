@@ -1,0 +1,66 @@
+# Byte-compiled and cached
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution and packaging
+build/
+dist/
+sdist/
+wheels/
+*.egg-info/
+*.egg
+.eggs/
+pip-wheel-metadata/
+
+# Environments
+.venv/
+venv/
+env/
+.python-version
+
+# Testing and coverage
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.hypothesis/
+
+# Type checkers and linters
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+
+# Editors and operating systems
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Notebooks
+.ipynb_checkpoints/
+
+# codonamr caches and outputs
+# The download cache is outside the repository by default, but do not commit
+# one if it is pointed here, and never commit a results directory.
+.cache/
+codonamr_cache/
+codonamr_results/
+results/
+out/
+*.tsv
+*.fna
+*.fna.gz
+*.gb
+*.gbk
+report.md
+figures/
+manifest.json
+
+# Keep any small fixture data that a test genuinely needs
+!tests/data/*.tsv
+!tests/data/*.fasta
