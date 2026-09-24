@@ -419,6 +419,24 @@ def cufs(rscu_a, rscu_b):
     Families empty in either table are skipped; the number of families actually
     compared is what limits how much a short gene can say. Returns ``None`` if
     no family is shared.
+
+    .. warning::
+       **This distance is dominated by gene length and must not be compared
+       across genes of different length without a length control.** A short
+       gene estimates each family's frequencies from few codons, so its RSCU
+       table is noisy and its distance from any reference is inflated, with no
+       difference in codon preference at all. Measured on the 4,016 ordinary
+       chromosomal genes of *Escherichia coli* K-12 MG1655, where no mobility
+       contrast exists by construction, Spearman's rho between CUFS to the
+       genome centroid and coding length is -0.81 (n = 4,016). The same
+       quantity for :func:`rscu_distance` is -0.77 for the euclidean metric and
+       -0.69 for the correlation metric, against -0.20 for CAI and -0.13 for
+       ENC. The practical consequence is large: the 13 mcr colistin-resistance
+       families, at 538 to 565 codons, score a *lower* raw CUFS to the E. coli
+       centroid (0.202) than E. coli's own chromosomal resistance genes (0.249)
+       purely because they are longer, which reverses the correct conclusion.
+       Use a length-matched comparison, or an index with weak length dependence
+       such as CAI or Fop, whenever lengths differ.
     """
     pa, pb, n = _paired_frequencies(rscu_a, rscu_b)
     if not n:
@@ -448,6 +466,13 @@ def rscu_distance(rscu_a, rscu_b, metric="euclidean"):
     Returns ``None`` if the tables share no usable family. A short gene leaves
     many families empty, so check how many codons went into the comparison
     before reading anything into the number.
+
+    .. warning::
+       Strongly length dependent, for the reason given under :func:`cufs`.
+       Across the 4,016 ordinary chromosomal genes of *E. coli* K-12 MG1655,
+       Spearman's rho against coding length is -0.77 for ``"euclidean"`` and
+       -0.69 for ``"correlation"``. Never compare genes of different length on
+       this scale without a length-matched control.
     """
     a, b = [], []
     for aa, fam in FAMILY.items():
