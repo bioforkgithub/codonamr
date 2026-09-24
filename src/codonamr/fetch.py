@@ -544,7 +544,9 @@ def _assembly_table(division, cache_dir, max_age_days=30, verbose=True):
                 continue
             if f[idx["version_status"]] != "latest":
                 continue
-            rows.append([f[idx[c]] for c in _SUMMARY_COLUMNS])
+            row = [f[idx[c]] for c in _SUMMARY_COLUMNS]
+            row[-1] = row[-1].rstrip("/")     # ftp_path, see resolve_host_genome
+            rows.append(row)
     _write_cache(path, "\n".join("\t".join(r) for r in rows) + "\n")
     return rows
 
@@ -686,7 +688,10 @@ def resolve_host_genome(taxid_or_organism, email=None, api_key=None,
     if hit is None:
         return None
 
-    base = hit.ftp_path.replace("ftp://", "https://")
+    # The ftp_path column of assembly_summary.txt is served with a trailing
+    # slash (checked 2026-09-24), which made the basename empty and every CDS
+    # download 404. Strip it before deriving the file name.
+    base = hit.ftp_path.replace("ftp://", "https://").rstrip("/")
     url = "%s/%s_cds_from_genomic.fna.gz" % (base, base.rsplit("/", 1)[-1])
     path = _cache_file(cache_dir, "genome", hit.accession, "_cds.fna.gz")
     if not path.exists():
