@@ -83,10 +83,26 @@ def enc(seq, min_expected=20):
       term is dropped from the sum rather than treated as zero.
     * The result is capped at 61.
 
-    Returns ``None`` when fewer than ``min_expected`` codon-equivalents of
-    information are available, rather than returning a precise-looking number
-    computed from almost nothing. Short genes hit this often, which matters for
-    resistance genes: many are under 200 codons.
+    ``min_expected`` is compared against the number of SYNONYMOUS FAMILIES that
+    contributed, not against a codon count: the counter reaches 2 + 9 + 1 + 5 + 3
+    = 20 when all four degeneracy classes are usable, so the default of 20 makes
+    ``None`` mean "at least one whole degeneracy class was unusable". Sequence
+    length never enters this function. A 36-codon input returns a number.
+
+    This is therefore NOT a length or stability guard, and a non-``None`` return
+    is not evidence that ENC is stable for that sequence. ENC destabilises when
+    individual synonymous families carry few codons, which happens long before a
+    whole class disappears; callers that need a length criterion (the usual rule
+    of thumb is about 200 codons) must apply it themselves, and callers comparing
+    ENC between sequences should note that the estimator carries a sampling sd of
+    roughly 1.6 units and a composition-dependent downward offset of 1.5 to 4.3
+    units even at 540 codons (measured by parametric bootstrap on the mcr set,
+    ``classes/01_colistin_mcr/scripts/102_referee_enc_stability_and_composition.py``).
+
+    Corrected 2026-09-24: this docstring previously said ``None`` was returned
+    "when fewer than ``min_expected`` codon-equivalents of information are
+    available ... Short genes hit this often". That described behaviour the code
+    does not implement. The code is unchanged; only the description is.
     """
     counts = defaultdict(lambda: defaultdict(int))
     for c in codon_list(seq):

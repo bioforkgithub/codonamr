@@ -17,10 +17,17 @@ STOPS = frozenset(c for c, a in CODON2AA.items() if a == "*")
 #: translated as Met when they occur in the initiator position, which is why
 #: AMRFinderPlus and Prokka call a protein-level 100 per cent allele match on a
 #: CDS whose first codon is, for example, ATA. Restricting QC to the first
-#: three silently rejects real genes: measured on 2026-09-24, the 3-codon set
-#: rejects 18 of the 9,786 CDS in shared/data/AMR_CDS.fa and 0 to 47 CDS per
+#: three rejects real genes. Measured on 2026-09-24 (reproduce with
+#: classes/01_colistin_mcr/scripts/141_referee_check_cds_start_set.py), the
+#: 3-codon set wrongly rejects 18 of the 9,786 CDS in shared/data/AMR_CDS.fa,
+#: every one of which carries a legal table-11 initiator, and 0 to 32 CDS per
 #: genome across the five host genomes in classes/01_colistin_mcr/data/
-#: host_cache, all of them with a legal table-11 initiator.
+#: host_cache (Enterobacter hormaechei 32, Acinetobacter baumannii 13,
+#: Salmonella Typhimurium LT2 12, E. coli O157:H7 Sakai 2, Klebsiella
+#: pneumoniae HS11286 0). Those per-genome figures are the CDS recovered by
+#: the wider set, not the bad_start totals: the two draft assemblies also
+#: carry CDS that begin at no initiator at all (15 in E. hormaechei, 9 in
+#: A. baumannii) and those stay rejected, correctly.
 STARTS_TABLE11 = ("ATG", "GTG", "TTG", "ATT", "ATC", "ATA", "CTG")
 
 #: The conservative 3-codon subset used before 2026-09-24. Kept so that a
@@ -41,5 +48,15 @@ SINGLETON = {a for a, cs in FAMILY.items() if len(cs) == 1}
 
 
 def codon_list(seq):
-    """Split an in-frame DNA string into codons."""
+    """Split an in-frame DNA string into codons.
+
+    The sequence is upper-cased first. Without that, a lower-case FASTA (which
+    ``shared/data/AMR_CDS.fa`` is) silently produced ``None`` from ``gc3s``,
+    ``enc``, ``scuo``, ``fop`` and ``cai`` and all-zero counts from
+    ``codon_counts``, while ``gc_content``, which upper-cases on its own, kept
+    returning a correct value. That mixture is worse than an error. Callers
+    that go through ``codonamr.qc.check_cds`` were never affected, since it
+    upper-cases and returns the cleaned sequence.
+    """
+    seq = seq.upper()
     return [seq[i:i + 3] for i in range(0, len(seq) - len(seq) % 3, 3)]
