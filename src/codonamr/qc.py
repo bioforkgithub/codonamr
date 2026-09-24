@@ -4,7 +4,7 @@ Every metric in this package assumes a clean, in-frame CDS. Garbage in one
 sequence quietly distorts a genome-level reference set, so QC is applied once,
 here, and the reasons for rejection are reported rather than swallowed.
 """
-from .genetic_code import STOPS, codon_list
+from .genetic_code import STARTS_TABLE11, STOPS, codon_list
 
 #: why a sequence was rejected; returned by :func:`check_cds`
 REASONS = ("ok", "too_short", "not_multiple_of_three", "ambiguous_bases",
@@ -12,7 +12,7 @@ REASONS = ("ok", "too_short", "not_multiple_of_three", "ambiguous_bases",
 
 
 def check_cds(seq, min_len=90, require_stop=True, require_start=True,
-              starts=("ATG", "GTG", "TTG")):
+              starts=STARTS_TABLE11):
     """Return ``(cleaned_sequence_or_None, reason)``.
 
     The cleaned sequence is uppercase DNA with the terminal stop removed.
@@ -22,6 +22,16 @@ def check_cds(seq, min_len=90, require_stop=True, require_start=True,
     synonymous family to estimate homozygosity, which is why :func:`codonamr.
     metrics.enc` returns ``None`` below its information threshold rather than a
     misleadingly precise number.
+
+    ``starts`` defaults to
+    :data:`codonamr.genetic_code.STARTS_TABLE11`, the seven initiation codons
+    of NCBI translation table 11. Before 2026-09-24 it defaulted to
+    ``("ATG", "GTG", "TTG")``, which rejected CDS beginning ATT, ATC, ATA or
+    CTG although table 11 permits all four and translates them as Met in the
+    initiator position. Pass
+    :data:`codonamr.genetic_code.STARTS_CONSERVATIVE` to reproduce the older
+    counts. The change affects only the ``bad_start`` outcome; it cannot turn
+    an ``ok`` sequence into a rejection.
     """
     s = str(seq).upper().replace("U", "T")
     if len(s) < min_len:
