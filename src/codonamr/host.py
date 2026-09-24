@@ -430,13 +430,34 @@ def cufs(rscu_a, rscu_b):
        contrast exists by construction, Spearman's rho between CUFS to the
        genome centroid and coding length is -0.81 (n = 4,016). The same
        quantity for :func:`rscu_distance` is -0.77 for the euclidean metric and
-       -0.69 for the correlation metric, against -0.20 for CAI and -0.13 for
-       ENC. The practical consequence is large: the 13 mcr colistin-resistance
+       -0.69 for the correlation metric, against **+0.20** for CAI and -0.13
+       for ENC.
+
+       The sign of the CAI figure matters and an earlier version of this
+       warning printed it as -0.20, which was wrong. CAI's weak length
+       dependence runs the *other* way from the distances: a long gene tends
+       to score slightly higher, not lower. So for a long gene the length
+       artefact flatters its CAI and works against finding a CAI deficit,
+       while it inflates its distance-based scores' apparent similarity to the
+       host. Remeasured on the same 4,016 genes with independent code on
+       2026-09-24, rho for CAI is +0.197 and for Fop +0.198 (see
+       ``classes/01_colistin_mcr/scripts/210_rerun_housekeeping_contrast.py``).
+
+       Part of the mechanism is countable: the number of amino-acid families a
+       gene's RSCU table can be compared on at all is itself a length meter,
+       rho +0.47 across the same 4,016 genes, running from 9 to 18 of the 18
+       degenerate families. A short gene is scored on fewer families, and on
+       each of them from fewer codons.
+
+       The practical consequence is large: the 13 mcr colistin-resistance
        families, at 538 to 565 codons, score a *lower* raw CUFS to the E. coli
        centroid (0.202) than E. coli's own chromosomal resistance genes (0.249)
        purely because they are longer, which reverses the correct conclusion.
        Use a length-matched comparison, or an index with weak length dependence
-       such as CAI or Fop, whenever lengths differ.
+       such as CAI or Fop, whenever lengths differ. Length-match without
+       replacement: matching 13 mcr genes to a pool of 10 candidate partners
+       with replacement leaves 7 distinct partners and turns a paired test's
+       nominal 2**13 labellings into far fewer independent ones.
     """
     pa, pb, n = _paired_frequencies(rscu_a, rscu_b)
     if not n:
